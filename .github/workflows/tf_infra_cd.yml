@@ -1,0 +1,41 @@
+on:
+  workflow_call:
+    inputs:
+      workdir:
+        required: true
+        type: string
+    secrets:
+      tf_api_token:
+        required: true
+      gh_owner:
+        required: true
+      gh_token:
+        required: true
+
+env:
+  GITHUB_OWNER: ${{ secrets.gh_owner }}
+  GITHUB_TOKEN: ${{ secrets.gh_token }}
+
+jobs:
+  cd:
+    name: 'cd'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.workdir }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.tf_api_token }}
+
+      - name: init
+        run: terraform init
+
+      - name: apply
+        run: terraform apply -auto-approve
