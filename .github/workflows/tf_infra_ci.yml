@@ -1,0 +1,58 @@
+on:
+  workflow_call:
+    inputs:
+      workdir:
+        required: true
+        type: string
+    secrets:
+      tf_api_token:
+        required: true
+      gh_owner:
+        required: true
+      gh_token:
+        required: true
+
+env:
+  GITHUB_OWNER: ${{ secrets.gh_owner }}
+  GITHUB_TOKEN: ${{ secrets.gh_token }}
+
+jobs:
+  ci:
+    name: 'ci'
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.workdir }}
+
+    steps:
+      - name: checkout
+        uses: actions/checkout@v2
+
+      - name: setup terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.tf_api_token }}
+
+      - name: fmt check
+        run: terraform fmt -recursive -check
+
+      - name: linter
+        run: |
+          curl -s https://raw.githubusercontent.com/terraform-linters/tflint/v0.28.1/install_linux.sh | bash
+          TFLINT_LOG=info tflint . -c ../.tflint.hcl
+
+      - name: security check
+        uses: bridgecrewio/checkov-action@v12.1128.0
+        with:
+          directory: .
+          framework: terraform
+
+      - name: init
+        run: terraform init
+
+      - name: validate
+        run: terraform validate
+
+      - name: plan
+        run: terraform plan
