@@ -11,10 +11,16 @@ on:
         required: true
       gh_token:
         required: true
+      aws_access_key_id:
+        required: false
+      aws_secret_access_key:
+        required: false
 
 env:
   GITHUB_OWNER: ${{ secrets.gh_owner }}
   GITHUB_TOKEN: ${{ secrets.gh_token }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.aws_access_key_id }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.aws_secret_access_key }}
 
 jobs:
   cd:
