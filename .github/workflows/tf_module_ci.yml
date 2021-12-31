@@ -8,9 +8,6 @@ on:
       gh_ssh_private_key:
         required: true
 
-env:
-  GH_SSH_PRIVATE_KEY: ${{ secrets.gh_ssh_private_key }}
-
 jobs:
   ci:
     name: 'ci'
@@ -25,7 +22,7 @@ jobs:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-add - <<< "${{ secrets.SSH_PRIVATE_KEY }}"
+          ssh-add - <<< "${{ secrets.gh_ssh_private_key }}"
 
       - name: setup terraform
         uses: hashicorp/setup-terraform@v1
